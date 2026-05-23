@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../auth/presentation/bloc/auth_bloc.dart';
 import '../../auth/presentation/bloc/auth_event.dart';
 import '../../auth/presentation/bloc/auth_state.dart';
+import '../../wallet/presentation/topt_card.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -32,7 +33,9 @@ class HomePage extends StatelessWidget {
             ),
           ],
         ),
-        body: Center(child: Text('Welcome to the Home Page!')),
+        body: const SingleChildScrollView(
+          child: Column(children: [SizedBox(height: 16), ToptCard()]),
+        ),
       ),
     );
   }
