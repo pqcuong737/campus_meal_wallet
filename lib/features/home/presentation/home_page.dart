@@ -33,8 +33,24 @@ class HomePage extends StatelessWidget {
             ),
           ],
         ),
-        body: const SingleChildScrollView(
-          child: Column(children: [SizedBox(height: 16), ToptCard()]),
+        body: SingleChildScrollView(
+          child: Column(children: [
+            SizedBox(height: 16), 
+            ToptCard(),
+            SizedBox(height: 16),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: () => context.push('/qr-scanner'),
+                  icon: Icon(Icons.qr_code_scanner),
+                  label: Text('Scan QR Code'),
+                ),
+              ),
+            ),
+          ]),
         ),
       ),
     );

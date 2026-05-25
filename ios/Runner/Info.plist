@@ -55,6 +55,8 @@
 	<string>Main</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID to unlock Campus Wallet</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Campus Wallet needs camera access to scan meal vouchers</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
