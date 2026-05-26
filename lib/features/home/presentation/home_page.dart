@@ -64,6 +64,19 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
+              SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: OutlinedButton.icon(
+                    onPressed: () => context.push('/order-queue'),
+                    icon: const Icon(Icons.cloud_off),
+                    label: const Text('Offline Order Queue'),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
