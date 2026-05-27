@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'app.dart';
+import 'core/network/dio_client.dart';
 import 'core/security/biometric_service.dart';
 import 'core/storage/secure_storage_service.dart';
 import 'core/network/connectivity_service.dart';
@@ -23,8 +24,8 @@ void main() async {
   const flutterSecureStorage = FlutterSecureStorage();
 
   final secureStorageService = SecureStorageService(flutterSecureStorage);
+  final dioClient = DioClient(secureStorageService);
   final authRepository = AuthRepository(secureStorageService);
-  final authBloc = AuthBloc(authRepository)..add(const AuthStarted());
   final biometricService = BiometricService();
   final connectivityService = ConnectivityService(Connectivity());
 
@@ -39,8 +40,12 @@ void main() async {
         RepositoryProvider.value(value: authRepository),
         RepositoryProvider.value(value: biometricService),
         RepositoryProvider.value(value: orderRepository),
+        RepositoryProvider.value(value: dioClient),
       ],
-      child: BlocProvider.value(value: authBloc, child: const MyApp())
-    )
+      child: BlocProvider.value(
+        value: AuthBloc(authRepository)..add(const AuthStarted()),
+        child: const MyApp(),
+      ),
+    ),
   );
 }
