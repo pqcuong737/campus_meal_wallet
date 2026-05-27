@@ -51,36 +51,92 @@ class _LoginPageState extends State<LoginPage> {
         }
       },
       child: Scaffold(
-        body: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextField(
-                controller: studentIdController,
-                decoration: InputDecoration(labelText: 'Username'),
+        backgroundColor: const Color(0xFFF7F8FA),
+        body: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+                side: BorderSide(color: Colors.grey.shade300),
               ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
-                obscureText: true,
-              ),
-              SizedBox(height: 32.0),
-              BlocBuilder<AuthBloc, AuthState>(
-                buildWhen: (previous, current) => previous.status != current.status,
-                builder: (context, state) {
-                  if (state.status == AuthStatus.loading) {
-                    return CircularProgressIndicator();
-                  }
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircleAvatar(
+                      radius: 36,
+                      child: Icon(Icons.school, size: 36),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Campus Wallet',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Sign in to manage meals, vouchers, and wallet.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey.shade700),
+                    ),
+                    const SizedBox(height: 32),
 
-                  return ElevatedButton(
-                    onPressed: submitLogin,
-                    child: Text('Login'),
-                  );
-                },
+                    TextField(
+                      controller: studentIdController,
+                      decoration: const InputDecoration(
+                        labelText: 'Student ID',
+                        prefixIcon: Icon(Icons.badge_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    TextField(
+                      controller: passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Password',
+                        prefixIcon: Icon(Icons.lock_outline),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    BlocBuilder<AuthBloc, AuthState>(
+                      buildWhen: (previous, current) =>
+                          previous.status != current.status,
+                      builder: (context, state) {
+                        final isLoading = state.status == AuthStatus.loading;
+
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: isLoading ? null : submitLogin,
+                            child: isLoading
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text('Login'),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
       ),

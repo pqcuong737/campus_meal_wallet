@@ -6,7 +6,9 @@ import '../../auth/presentation/bloc/auth_bloc.dart';
 import '../../auth/presentation/bloc/auth_event.dart';
 import '../../auth/presentation/bloc/auth_state.dart';
 import '../../wallet/presentation/topt_card.dart';
+import '../../../shared/widgets/dashboard_action_card.dart';
 import 'api_test_button.dart';
+import 'widgets/dashboard_header.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -25,8 +27,11 @@ class HomePage extends StatelessWidget {
         }
       },
       child: Scaffold(
+        backgroundColor: const Color(0xFFF7F8FA),
         appBar: AppBar(
           title: Text('Home'),
+          backgroundColor: const Color(0xFFF7F8FA),
+          elevation: 0,
           actions: [
             IconButton(
               icon: Icon(Icons.logout),
@@ -37,49 +42,54 @@ class HomePage extends StatelessWidget {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 16),
+              DashboardHeader(),
+
               ToptCard(),
-              SizedBox(height: 16),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    onPressed: () => context.push('/qr-scanner'),
-                    icon: Icon(Icons.qr_code_scanner),
-                    label: Text('Scan QR Code'),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    onPressed: () => context.push('/order-tracking'),
-                    icon: Icon(Icons.local_shipping),
-                    label: Text('Track Meal Order'),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: OutlinedButton.icon(
-                    onPressed: () => context.push('/order-queue'),
-                    icon: const Icon(Icons.cloud_off),
-                    label: const Text('Offline Order Queue'),
-                  ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Column(
+                        children: [
+                          DashboardActionCard(
+                            icon: Icons.qr_code_scanner,
+                            title: 'Scan Meal Voucher',
+                            subtitle: 'Validate student meal QR code',
+                            onTap: () => context.push('/qr-scanner'),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          DashboardActionCard(
+                            icon: Icons.delivery_dining,
+                            title: 'Track Meal Order',
+                            subtitle: 'Realtime order status updates',
+                            onTap: () => context.push('/order-tracking'),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          DashboardActionCard(
+                            icon: Icons.cloud_off,
+                            title: 'Offline Order Queue',
+                            subtitle: 'Place orders offline and sync later',
+                            onTap: () => context.push('/order-queue'),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          const ApiTestButton(),
+
+                          const SizedBox(height: 24),
+                        ]
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 16),
-              const ApiTestButton(),
             ],
           ),
         ),
