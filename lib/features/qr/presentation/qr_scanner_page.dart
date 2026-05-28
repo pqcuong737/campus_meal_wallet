@@ -34,7 +34,7 @@ class _QrScannerPageState extends State<QrScannerPage> {
   }
 
   Future<void> validateVoucher(String code) async {
-    await Future.delayed(const Duration(seconds: 700));
+    await Future.delayed(const Duration(milliseconds: 700));
 
     if (!mounted) return;
 
