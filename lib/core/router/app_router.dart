@@ -7,6 +7,7 @@ import '../../features/auth/presentation/splash_page.dart';
 import '../../features/qr/presentation/qr_fast_scan_page.dart';
 import '../../features/orders/presentation/order_tracking_page.dart';
 import '../../features/orders/presentation/order_queue_page.dart';
+import '../../features/menu/presentation/menu_page.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/login',
@@ -18,5 +19,6 @@ final appRouter = GoRouter(
     GoRoute(path: '/qr-scanner', builder: (context, state) => QrFastScanPage()),
     GoRoute(path: '/order-tracking', builder: (context, state) => OrderTrackingPage()),
     GoRoute(path: '/order-queue', builder: (context, state) => OrderQueuePage()),
+    GoRoute(path: '/menu', builder: (context, state) => MenuPage()),
   ]
 );

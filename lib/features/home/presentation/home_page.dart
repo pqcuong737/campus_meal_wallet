@@ -81,6 +81,15 @@ class HomePage extends StatelessWidget {
 
                           const SizedBox(height: 12),
 
+                          DashboardActionCard(
+                            icon: Icons.restaurant_menu,
+                            title: 'Browse Campus Menu',
+                            subtitle: 'Order meals and drinks from cafeteria',
+                            onTap: () => context.push('/menu'),
+                          ),
+
+                          const SizedBox(height: 24),
+
                           const ApiTestButton(),
 
                           const SizedBox(height: 24),
