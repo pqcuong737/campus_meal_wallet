@@ -1,9 +1,9 @@
 import 'package:local_auth/local_auth.dart';
 
 class BiometricService {
-  final LocalAuthentication _auth = LocalAuthentication();
+  final LocalAuthentication _auth;
 
-  BiometricService();
+  BiometricService(this._auth);
 
   Future<bool> canAuthenticate() async {
     return await _auth.canCheckBiometrics || await _auth.isDeviceSupported();

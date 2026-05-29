@@ -56,7 +56,7 @@ class HomePage extends StatelessWidget {
                         children: [
                           DashboardActionCard(
                             icon: Icons.qr_code_scanner,
-                            title: 'Scan Meal Voucher',
+                            title: 'Fast Scan Meal Voucher',
                             subtitle: 'Validate student meal QR code',
                             onTap: () => context.push('/qr-scanner'),
                           ),

@@ -1,14 +1,15 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:local_auth/local_auth.dart';
 
 import 'app.dart';
+import 'core/network/connectivity_service.dart';
 import 'core/network/dio_client.dart';
 import 'core/security/biometric_service.dart';
 import 'core/storage/secure_storage_service.dart';
-import 'core/network/connectivity_service.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
@@ -25,8 +26,11 @@ void main() async {
 
   final secureStorageService = SecureStorageService(flutterSecureStorage);
   final dioClient = DioClient(secureStorageService);
+
   final authRepository = AuthRepository(secureStorageService);
-  final biometricService = BiometricService();
+
+  final biometricService = BiometricService(LocalAuthentication());
+
   final connectivityService = ConnectivityService(Connectivity());
 
   final orderRepository = OrderRepository(
@@ -42,8 +46,8 @@ void main() async {
         RepositoryProvider.value(value: orderRepository),
         RepositoryProvider.value(value: dioClient),
       ],
-      child: BlocProvider.value(
-        value: AuthBloc(authRepository)..add(const AuthStarted()),
+      child: BlocProvider(
+        create: (_) => AuthBloc(authRepository)..add(const AuthStarted()),
         child: const MyApp(),
       ),
     ),
