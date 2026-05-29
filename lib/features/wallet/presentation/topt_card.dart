@@ -11,7 +11,8 @@ class ToptCard extends StatefulWidget {
 }
 
 class _ToptCardState extends State<ToptCard> {
-  static const String secret = 'JBSWY3DPEHPK3PXP';
+  // maybe should be generated per user and stored securely, but for demo purpose it's hardcoded :3
+  static const String secret = 'HELLO_SECRET_KEY'; 
 
   Timer? _timer;
   String otpCode = '';
@@ -41,6 +42,8 @@ class _ToptCardState extends State<ToptCard> {
 
     final currentSeconds = DateTime.now().second;
     final remaining = 30 - (currentSeconds % 30);
+
+    if (!mounted) return; // prevent setState if widget is disposed :))
 
     setState(() {
       otpCode = currentOtp;

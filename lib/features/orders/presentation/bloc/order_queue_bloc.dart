@@ -27,6 +27,8 @@ class OrderQueueBloc extends Bloc<OrderQueueEvent, OrderQueueState> {
     OrderPlaced event,
     Emitter<OrderQueueState> emit,
   ) async {
+    if (state.status == OrderQueueStatus.loading) return; // Avoiding multiple press place order :3
+
     emit(state.copyWith(status: OrderQueueStatus.loading));
 
     try {
@@ -34,6 +36,8 @@ class OrderQueueBloc extends Bloc<OrderQueueEvent, OrderQueueState> {
         itemName: event.itemName,
         quantity: event.quantity,
       );
+
+      if (isClosed) return; // Bloc may have been closed while placing order :))
 
       final pendingOrders = repository.getPendingOrders();
 
@@ -49,6 +53,8 @@ class OrderQueueBloc extends Bloc<OrderQueueEvent, OrderQueueState> {
         ),
       );
     } catch (_) {
+      if (isClosed) return; // Bloc may have been closed during the error handling :))
+
       emit(
         state.copyWith(
           status: OrderQueueStatus.failure,

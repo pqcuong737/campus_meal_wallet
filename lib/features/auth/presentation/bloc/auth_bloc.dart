@@ -24,10 +24,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLoggedIn(AuthLoggedIn event, Emitter<AuthState> emit) async {
+    if (state.status == AuthStatus.loading) return; // prevent multiple login attempts (double tap) :3 :3
+
     emit(state.copyWith(status: AuthStatus.loading));
 
     try {
       await authRepository.login(studentId: event.id, password: event.password);
+
+      if (isClosed) return; // prevent emitting state after bloc is closed :))
+
       emit(state.copyWith(status: AuthStatus.authenticated));
     }
     catch (e) {

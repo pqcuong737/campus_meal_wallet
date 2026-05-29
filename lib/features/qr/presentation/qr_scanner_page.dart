@@ -9,34 +9,50 @@ class QrScannerPage extends StatefulWidget {
 }
 
 class _QrScannerPageState extends State<QrScannerPage> {
-  final MobileScannerController cameraController = MobileScannerController();
+  final MobileScannerController cameraController = MobileScannerController(
+    detectionSpeed: DetectionSpeed.unrestricted,
+    detectionTimeoutMs: 250,
+    formats: const [BarcodeFormat.qrCode],
+    facing: CameraFacing.back,
+    torchEnabled: false,
+    returnImage: false,
+    autoStart: true,
+  );
 
   bool isProcessing = false;
   String? scannedCode;
   String? voucherMessage;
   int? voucherValue;
+  DateTime? lastScanTime;
+  String? lastCode;
+
 
   Future<void> onDetect(BarcodeCapture capture) async {
-    if (isProcessing) return;
+    final code = capture.barcodes.first.rawValue;
 
-    final barcode = capture.barcodes.firstOrNull;
-    final rawValue = barcode?.rawValue;
+    if (code == null) return;
 
-    if (rawValue == null || rawValue.isEmpty) return;
+    final now = DateTime.now();
 
-    setState(() {
-      isProcessing = true;
-      scannedCode = rawValue;
-    });
+    // prevent duplicate scan
+    if (lastCode == code &&
+        lastScanTime != null &&
+        now.difference(lastScanTime!) < const Duration(seconds: 2)) {
+      return;
+    }
 
-    await cameraController.stop();
-    await validateVoucher(rawValue);
+    lastCode = code;
+    lastScanTime = now;
+
+    validateVoucher(code);
   }
 
   Future<void> validateVoucher(String code) async {
     await Future.delayed(const Duration(milliseconds: 700));
 
+    // prevent showing result if not on this page :))
     if (!mounted) return;
+    if (ModalRoute.of(context)?.isCurrent != true) return;
 
     if (code == 'MEAL_100K_ABC') {
       setState(() {
@@ -57,8 +73,10 @@ class _QrScannerPageState extends State<QrScannerPage> {
     showResultBottomSheet();
   }
 
-  Future<void> resetScanner() async {
-    Navigator.of(context).pop();
+  Future<void> resetScanner(BuildContext sheetContext) async {
+    Navigator.of(sheetContext).pop();
+
+    if (!mounted) return; // prevent using context if widget is disposed :3
 
     setState(() {
       isProcessing = false;
@@ -85,11 +103,15 @@ class _QrScannerPageState extends State<QrScannerPage> {
   }
 
   void showResultBottomSheet() {
+    // prevent showing bottom sheet if not on this page :))
+    if (!mounted) return;
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+
     showModalBottomSheet<void>(
       context: context,
       isDismissible: false,
       enableDrag: false,
-      builder: (_) {
+      builder: (sheetContext) {
         final isValid = voucherValue != null;
         return Padding(
           padding: const EdgeInsets.all(16.0),
@@ -112,7 +134,7 @@ class _QrScannerPageState extends State<QrScannerPage> {
               const SizedBox(height: 16),
               if (voucherValue != null)
                 Text(
-                  'Voucher Value: $voucherValue',
+                  'Voucher Value: ${formatVnd(voucherValue!)}',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               const SizedBox(height: 24),
@@ -120,7 +142,8 @@ class _QrScannerPageState extends State<QrScannerPage> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: resetScanner,
+                  // prevent using parent context to pop, which might cause issues if not on this page :))
+                  onPressed: () => resetScanner(sheetContext),
                   child: Text('Scan Again'),
                 ),
               ),

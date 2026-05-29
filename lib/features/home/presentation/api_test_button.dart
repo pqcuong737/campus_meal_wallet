@@ -13,6 +13,7 @@ class ApiTestButton extends StatelessWidget {
       await dioClient.dio.get('/users/1');
 
       if (!context.mounted) return;
+      if (ModalRoute.of(context)?.isCurrent != true) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -21,6 +22,7 @@ class ApiTestButton extends StatelessWidget {
       );
     } catch (_) {
       if (!context.mounted) return;
+      if (ModalRoute.of(context)?.isCurrent != true) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

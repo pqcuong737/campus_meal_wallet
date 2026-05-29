@@ -19,8 +19,9 @@ class OrderTrackingPage extends StatelessWidget {
 
     return BlocProvider(
       create: (_) =>
+          // for demo purpose, we use a mock order id that will emit predefined status updates :))
           OrderTrackingBloc(OrderTrackingRepository())
-            ..add(const OrderTrackingStarted('mock_order_001')),
+            ..add(const OrderTrackingStarted('mock_order_hello:3')), 
       child: const _OrderTrackingView(),
     );
   }

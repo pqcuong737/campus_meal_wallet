@@ -13,7 +13,10 @@ class OrderRepository {
     required this.connectivityService,
   });
 
-  Future<PendingOrder> placeOrder({required String itemName, required int quantity}) async {
+  Future<PendingOrder> placeOrder({
+    required String itemName,
+    required int quantity,
+  }) async {
     final order = PendingOrder(
       id: const Uuid().v4(),
       itemName: itemName,
@@ -62,7 +65,15 @@ class OrderRepository {
 
   Future<void> _submitToServer(PendingOrder order) async {
     // Simulate network call
+    // final dioClient = context.read<DioClient>();
     await Future.delayed(const Duration(seconds: 1));
-    // Mock API success. POST /orders with idempotency key = order.id 
+    
+    // Mock API success. POST /orders with idempotency key = order.id
+    // Sample:
+    // await dioClient.post(
+    //   '/orders',
+    //   data: order.toJson(),
+    //   options: Options(headers: {'Idempotency-Key': order.id}), // Ensures server treats retries as same order
+    // );
   }
 }

@@ -10,6 +10,8 @@ class OrderTrackingBloc extends Bloc<OrderTrackingEvent, OrderTrackingState> {
 
   StreamSubscription<OrderStatus>? _subscription;
 
+  String? _currentOrderId;
+
   OrderTrackingBloc(this.repository)
     : super(const OrderTrackingState.initial()) {
     on<OrderTrackingStarted>(_onStarted);
@@ -21,6 +23,8 @@ class OrderTrackingBloc extends Bloc<OrderTrackingEvent, OrderTrackingState> {
     OrderTrackingStarted event,
     Emitter<OrderTrackingState> emit,
   ) async {
+    _currentOrderId = event.orderId;
+
     emit(
       state.copyWith(
         connectionStatus: OrderTrackingConnectionStatus.connecting,
@@ -59,7 +63,7 @@ class OrderTrackingBloc extends Bloc<OrderTrackingEvent, OrderTrackingState> {
   }
 
   Future<void> _onConnectionLost(OrderTrackingConnectionLost event, Emitter<OrderTrackingState> emit) async {
-    final nextAttempt = state.reconnectAttempts + 1;
+    final nextAttempt = state.reconnectAttempts + 1; // Increment attempt count for backoff calculation
 
     emit(
       state.copyWith(
@@ -72,7 +76,11 @@ class OrderTrackingBloc extends Bloc<OrderTrackingEvent, OrderTrackingState> {
 
     await Future.delayed(Duration(seconds: delaySeconds));
 
-    add(const OrderTrackingStarted('order123'));
+    if (isClosed) return; // Bloc may have been closed during the delay :3
+
+    if (_currentOrderId == null || _currentOrderId!.isEmpty) return; // No order to track
+
+    add(OrderTrackingStarted(_currentOrderId!));
   }
 
   int _getBackoffSeconds(int attempt) {

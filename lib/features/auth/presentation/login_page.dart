@@ -38,6 +38,9 @@ class _LoginPageState extends State<LoginPage> {
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (previous, current) => previous.status != current.status,
       listener: (context, state) {
+        // prevent navigation if not on this page :/ and also prevent showing snackbar if not on this page :))
+        if (ModalRoute.of(context)?.isCurrent != true) return; 
+
         if (state.status == AuthStatus.authenticated) {
           context.go('/home');
         }
