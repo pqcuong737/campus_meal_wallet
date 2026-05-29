@@ -12,7 +12,7 @@ class ToptCard extends StatefulWidget {
 
 class _ToptCardState extends State<ToptCard> {
   // maybe should be generated per user and stored securely, but for demo purpose it's hardcoded :3
-  static const String secret = 'HELLO_SECRET_KEY'; 
+  static const String secret = 'HELLO3SECRET3KEY';
 
   Timer? _timer;
   String otpCode = '';
