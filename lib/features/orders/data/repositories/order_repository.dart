@@ -7,6 +7,7 @@ import '../models/pending_order.dart';
 class OrderRepository {
   final OrderLocalDataSource localDataSource;
   final ConnectivityService connectivityService;
+  bool _isSyncing = false;
 
   OrderRepository({
     required this.localDataSource,
@@ -39,19 +40,27 @@ class OrderRepository {
   }
 
   Future<void> syncPendingOrders() async {
-    final online = await connectivityService.isOnline;
+    if (_isSyncing) return; // guard against concurrent syncs
 
-    if (!online) return;
+    _isSyncing = true;
 
-    final pendingOrders = localDataSource.getPendingOrders();
+    try {
+      final online = await connectivityService.isOnline;
 
-    for (final order in pendingOrders) {
-      try {
-        await _submitToServer(order);
-        await localDataSource.maskAsSynced(order.id);
-      } catch (e) {
-        // keep it pending
+      if (!online) return;
+
+      final pendingOrders = localDataSource.getPendingOrders();
+
+      for (final order in pendingOrders) {
+        try {
+          await _submitToServer(order);
+          await localDataSource.maskAsSynced(order.id);
+        } catch (e) {
+          // Log error, but continue with next order
+        }
       }
+    } finally {
+      _isSyncing = false;
     }
   }
 
