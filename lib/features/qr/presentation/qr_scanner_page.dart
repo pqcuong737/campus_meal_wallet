@@ -10,28 +10,31 @@ class QrScannerPage extends StatefulWidget {
 
 class _QrScannerPageState extends State<QrScannerPage>
     with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  final MobileScannerController cameraController = MobileScannerController(
-    detectionSpeed: DetectionSpeed.unrestricted,
-    detectionTimeoutMs: 250,
-    formats: const [BarcodeFormat.qrCode],
-    facing: CameraFacing.back,
-    torchEnabled: false,
-    returnImage: false,
-    autoStart: true,
-  );
+  late final MobileScannerController cameraController;
 
   bool isProcessing = false;
+  bool isCameraStarted = true;
   String? scannedCode;
   String? voucherMessage;
   int? voucherValue;
   DateTime? lastScanTime;
   String? lastCode;
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    cameraController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.unrestricted,
+      detectionTimeoutMs: 250,
+      formats: const [BarcodeFormat.qrCode],
+      facing: CameraFacing.back,
+      torchEnabled: false,
+      returnImage: false,
+      autoStart: true,
+    );
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {

@@ -27,7 +27,11 @@ class OrderQueueBloc extends Bloc<OrderQueueEvent, OrderQueueState> {
     OrderPlaced event,
     Emitter<OrderQueueState> emit,
   ) async {
-    if (state.status == OrderQueueStatus.loading) return; // Avoiding multiple press place order :3
+    // Avoiding multiple press place order :3
+    if (state.status == OrderQueueStatus.loading ||
+        state.status == OrderQueueStatus.syncing) {
+      return;
+    }
 
     emit(state.copyWith(status: OrderQueueStatus.loading));
 
@@ -53,7 +57,8 @@ class OrderQueueBloc extends Bloc<OrderQueueEvent, OrderQueueState> {
         ),
       );
     } catch (_) {
-      if (isClosed) return; // Bloc may have been closed during the error handling :))
+      // Bloc may have been closed during the error handling :))
+      if (isClosed) return; 
 
       emit(
         state.copyWith(
@@ -68,9 +73,15 @@ class OrderQueueBloc extends Bloc<OrderQueueEvent, OrderQueueState> {
     OrderQueueSyncRequested event,
     Emitter<OrderQueueState> emit,
   ) async {
+    // Avoid multiple syncs at the same time :3
+    if (state.status == OrderQueueStatus.syncing) return;
+
     emit(state.copyWith(status: OrderQueueStatus.syncing));
 
     await repository.syncPendingOrders();
+
+    // Bloc may have been closed while syncing :))
+    if (isClosed) return;
 
     emit(
       state.copyWith(
@@ -85,10 +96,13 @@ class OrderQueueBloc extends Bloc<OrderQueueEvent, OrderQueueState> {
     OrderQueueConnectivityChanged event,
     Emitter<OrderQueueState> emit,
   ) async {
+    if (isClosed) return; // Bloc may have been closed while handling connectivity change :))
+
     emit(
       state.copyWith(
         isOnline: event.isOnline,
         pendingOrders: repository.getPendingOrders(),
+        message: event.isOnline ? 'Back online' : 'You are offline',
       ),
     );
 

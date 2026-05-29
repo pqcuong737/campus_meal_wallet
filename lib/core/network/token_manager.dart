@@ -1,24 +1,25 @@
 import '../storage/secure_storage_service.dart';
 
 class TokenManager {
-  final SecureStorageService _secureStorageService;
+  final SecureStorageService secureStorage;
 
   bool _isRefreshing = false;
   Future<String?>? _refreshFuture;
 
-  TokenManager(this._secureStorageService);
+  TokenManager(this.secureStorage);
 
-  Future<String?> getAccessToken() async {
-    return await _secureStorageService.getAccessToken();
+  Future<String?> getAccessToken() {
+    return secureStorage.getAccessToken();
   }
 
-  Future<String?> getRefreshToken() async {
-    return await _secureStorageService.getRefreshToken();
+  Future<String?> getRefreshToken() {
+    return secureStorage.getRefreshToken();
   }
 
-  Future<String?> refreshAccessToken() async {
+  Future<String?> refreshAccessToken() {
+    // If a refresh is already in progress, return the existing future to prevent multiple simultaneous refreshes
     if (_isRefreshing && _refreshFuture != null) {
-      return _refreshFuture;
+      return _refreshFuture!;
     }
 
     _isRefreshing = true;
@@ -31,22 +32,32 @@ class TokenManager {
   }
 
   Future<String?> _doRefresh() async {
-    final refreshToken = await getRefreshToken();
+    final refreshToken = await secureStorage.getRefreshToken();
 
-    if (refreshToken == null) {
+    if (refreshToken == null || refreshToken.isEmpty) {
+      await clearTokens();
       return null;
     }
 
-    await Future.delayed(const Duration(seconds: 700));
+    try {
+      await Future.delayed(const Duration(milliseconds: 700)); // My fault =)) when 700s before deadline :3
 
-    final newAccessToken = 'mock_refreshed_access_token_${DateTime.now().toIso8601String()}';
+      final newAccessToken =
+          'mock_refreshed_access_token_${DateTime.now().millisecondsSinceEpoch}';
 
-    await _secureStorageService.saveTokens(newAccessToken, refreshToken);
+      await secureStorage.saveTokens(
+        accessToken: newAccessToken,
+        refreshToken: refreshToken,
+      );
 
-    return newAccessToken;
+      return newAccessToken;
+    } catch (_) {
+      await clearTokens();
+      return null;
+    }
   }
 
-  Future<void> clearTokens() async {
-    await _secureStorageService.clearTokens();
+  Future<void> clearTokens() {
+    return secureStorage.clearTokens();
   }
 }

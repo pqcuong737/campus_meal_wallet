@@ -12,7 +12,7 @@ class OrderQueuePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => OrderQueueBloc(context.read<OrderRepository>()),
+      create: (_) => OrderQueueBloc(context.read<OrderRepository>()),
       child: const _OrderQueueView(),
     );
   }
@@ -23,48 +23,72 @@ class _OrderQueueView extends StatelessWidget {
 
   void placeOrder(BuildContext context) {
     context.read<OrderQueueBloc>().add(
-      const OrderPlaced(itemName: 'Sample Item', quantity: 1),
-    );
+          const OrderPlaced(
+            itemName: 'Chicken Rice',
+            quantity: 1,
+          ),
+        );
   }
 
   void sync(BuildContext context) {
-    context.read<OrderQueueBloc>().add(const OrderQueueSyncRequested());
+    context.read<OrderQueueBloc>().add(
+          const OrderQueueSyncRequested(),
+        );
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<OrderQueueBloc, OrderQueueState>(
-      listenWhen: (previous, current) =>
-          previous.message != current.message && current.message != null,
+      listenWhen: (previous, current) {
+        return previous.message != current.message &&
+            current.message != null;
+      },
       listener: (context, state) {
-        if (state.message != null) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message!)));
-        }
+        if (ModalRoute.of(context)?.isCurrent != true) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.message!),
+          ),
+        );
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Order Queue')),
+        appBar: AppBar(
+          title: const Text('Offline Order Queue'),
+        ),
         body: BlocBuilder<OrderQueueBloc, OrderQueueState>(
+          buildWhen: (previous, current) {
+            // Only rebuild when status, pending orders, or connectivity changes
+            return previous.status != current.status ||
+                previous.pendingOrders != current.pendingOrders ||
+                previous.isOnline != current.isOnline;
+          },
           builder: (context, state) {
             final isLoading =
                 state.status == OrderQueueStatus.loading ||
                 state.status == OrderQueueStatus.syncing;
 
             return Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  _ConnectionStatusCard(isOnline: state.isOnline ?? true),
-                  
+                  _ConnectionStatusCard(isOnline: state.isOnline!),
+
                   const SizedBox(height: 24),
 
                   SizedBox(
                     width: double.infinity,
+                    height: 52,
                     child: ElevatedButton.icon(
-                      onPressed: isLoading ? null : () => placeOrder(context),
+                      onPressed: isLoading
+                          ? null
+                          : () => placeOrder(context),
                       icon: const Icon(Icons.restaurant),
-                      label: Text(isLoading ? 'Processing...' : 'Place Order'),
+                      label: Text(
+                        state.status == OrderQueueStatus.loading
+                            ? 'Placing order...'
+                            : 'Place Chicken Rice Order',
+                      ),
                     ),
                   ),
 
@@ -72,10 +96,15 @@ class _OrderQueueView extends StatelessWidget {
 
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
+                    height: 52,
+                    child: OutlinedButton.icon(
                       onPressed: isLoading ? null : () => sync(context),
                       icon: const Icon(Icons.sync),
-                      label: const Text('Sync Pending Orders'),
+                      label: Text(
+                        state.status == OrderQueueStatus.syncing
+                            ? 'Syncing...'
+                            : 'Sync Pending Orders',
+                      ),
                     ),
                   ),
 
@@ -84,7 +113,7 @@ class _OrderQueueView extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Pending Orders: ${state.pendingOrders.length}',
+                      'Pending Orders (${state.pendingOrders.length})',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -96,19 +125,25 @@ class _OrderQueueView extends StatelessWidget {
 
                   Expanded(
                     child: state.pendingOrders.isEmpty
-                        ? const Center(child: Text('No pending orders'))
+                        ? const _EmptyPendingOrders()
                         : ListView.separated(
                             itemCount: state.pendingOrders.length,
                             separatorBuilder: (_, _) =>
                                 const SizedBox(height: 8),
                             itemBuilder: (context, index) {
                               final order = state.pendingOrders[index];
-                              return ListTile(
-                                title: Text(order.itemName),
-                                subtitle: Text(
-                                  'Qty: ${order.quantity}\nID: ${order.id}}}',
+
+                              return Card(
+                                elevation: 0,
+                                child: ListTile(
+                                  title: Text(order.itemName),
+                                  subtitle: Text(
+                                    'Qty: ${order.quantity}\nID: ${order.id}',
+                                  ),
+                                  trailing: const Chip(
+                                    label: Text('Pending'),
+                                  ),
                                 ),
-                                trailing: const Chip(label: Text('Pending')),
                               );
                             },
                           ),
@@ -126,7 +161,9 @@ class _OrderQueueView extends StatelessWidget {
 class _ConnectionStatusCard extends StatelessWidget {
   final bool isOnline;
 
-  const _ConnectionStatusCard({required this.isOnline});
+  const _ConnectionStatusCard({
+    required this.isOnline,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -136,10 +173,10 @@ class _ConnectionStatusCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
@@ -152,8 +189,19 @@ class _ConnectionStatusCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-        ]
+        ],
       ),
+    );
+  }
+}
+
+class _EmptyPendingOrders extends StatelessWidget {
+  const _EmptyPendingOrders();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text('No pending orders'),
     );
   }
 }

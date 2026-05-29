@@ -2,11 +2,14 @@ import '../../../../core/storage/secure_storage_service.dart';
 import '../models/auth_tokens.dart';
 
 class AuthRepository {
-  final SecureStorageService  _secureStorageService;
-  
+  final SecureStorageService _secureStorageService;
+
   AuthRepository(this._secureStorageService);
 
-  Future<AuthTokens> login({ required String studentId, required String password}) async {
+  Future<AuthTokens> login({
+    required String studentId,
+    required String password,
+  }) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 2));
 
@@ -17,7 +20,10 @@ class AuthRepository {
     );
 
     // Save tokens securely
-    await _secureStorageService.saveTokens(tokens.accessToken, tokens.refreshToken);
+    await _secureStorageService.saveTokens(
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    );
 
     return tokens;
   }
