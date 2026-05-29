@@ -8,7 +8,33 @@ class QrScannerPage extends StatefulWidget {
   State<QrScannerPage> createState() => _QrScannerPageState();
 }
 
-class _QrScannerPageState extends State<QrScannerPage> {
+class _QrScannerPageState extends State<QrScannerPage> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    cameraController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // prevent camera issues when app goes to background or comes back to foreground :3
+    if (state == AppLifecycleState.resumed && !isProcessing) {
+      cameraController.start();
+    } else if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      cameraController.stop();
+    }
+  }
+
   final MobileScannerController cameraController = MobileScannerController(
     detectionSpeed: DetectionSpeed.unrestricted,
     detectionTimeoutMs: 250,
@@ -152,12 +178,6 @@ class _QrScannerPageState extends State<QrScannerPage> {
         );
       },
     );
-  }
-
-  @override
-  void dispose() {
-    cameraController.dispose();
-    super.dispose();
   }
 
   @override
