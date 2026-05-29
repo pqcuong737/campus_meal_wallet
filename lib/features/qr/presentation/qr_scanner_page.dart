@@ -8,31 +8,12 @@ class QrScannerPage extends StatefulWidget {
   State<QrScannerPage> createState() => _QrScannerPageState();
 }
 
-class _QrScannerPageState extends State<QrScannerPage> with WidgetsBindingObserver {
+class _QrScannerPageState extends State<QrScannerPage>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    cameraController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-
-    // prevent camera issues when app goes to background or comes back to foreground :3
-    if (state == AppLifecycleState.resumed && !isProcessing) {
-      cameraController.start();
-    } else if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused) {
-      cameraController.stop();
-    }
   }
 
   final MobileScannerController cameraController = MobileScannerController(
@@ -52,6 +33,18 @@ class _QrScannerPageState extends State<QrScannerPage> with WidgetsBindingObserv
   DateTime? lastScanTime;
   String? lastCode;
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // prevent camera issues when app goes to background or comes back to foreground :3
+    if (state == AppLifecycleState.resumed && !isProcessing) {
+      cameraController.start();
+    } else if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      cameraController.stop();
+    }
+  }
 
   Future<void> onDetect(BarcodeCapture capture) async {
     final code = capture.barcodes.first.rawValue;
@@ -178,6 +171,13 @@ class _QrScannerPageState extends State<QrScannerPage> with WidgetsBindingObserv
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    cameraController.dispose();
+    super.dispose();
   }
 
   @override
