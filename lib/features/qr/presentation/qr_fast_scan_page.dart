@@ -26,8 +26,9 @@ class _QrFastScanView extends StatefulWidget {
 }
 
 class _QrFastScanViewState extends State<_QrFastScanView>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, RouteAware {
   late final MobileScannerController controller;
+  bool _isStartingCamera = false;
 
   @override
   void initState() {
@@ -36,7 +37,8 @@ class _QrFastScanViewState extends State<_QrFastScanView>
     WidgetsBinding.instance.addObserver(this);
 
     controller = MobileScannerController(
-      detectionSpeed: DetectionSpeed.unrestricted, // Allow continuous scanning without delay
+      detectionSpeed: DetectionSpeed
+          .unrestricted, // Allow continuous scanning without delay
       detectionTimeoutMs: 250, // Short timeout to allow quick successive scans
       formats: const [BarcodeFormat.qrCode],
       facing: CameraFacing.back,
@@ -50,12 +52,52 @@ class _QrFastScanViewState extends State<_QrFastScanView>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (!mounted) return;
 
-    if (state == AppLifecycleState.resumed) {
-      if (ModalRoute.of(context)?.isCurrent == true) {
-        controller.start();
-      }
-    } else {
-      controller.stop();
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _resumeCameraSafely();
+        break;
+
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        _stopCameraSafely();
+        break;
+    }
+  }
+
+  Future<void> _resumeCameraSafely() async {
+    if (_isStartingCamera) return;
+    _isStartingCamera = true;
+
+    try {
+      // Small delay to ensure camera resources are released before restarting
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      if (!mounted) return;
+      if (ModalRoute.of(context)?.isCurrent != true) return;
+
+      await controller.stop();
+
+      // Small delay to ensure camera resources are released before restarting
+      await Future.delayed(const Duration(milliseconds: 150));
+
+      if (!mounted) return;
+      if (ModalRoute.of(context)?.isCurrent != true) return;
+
+      await controller.start();
+    } catch (e) {
+      debugPrint('Resume camera failed: $e');
+    } finally {
+      _isStartingCamera = false;
+    }
+  }
+
+  Future<void> _stopCameraSafely() async {
+    try {
+      await controller.stop();
+    } catch (e) {
+      debugPrint('Stop camera failed: $e');
     }
   }
 
@@ -63,17 +105,13 @@ class _QrFastScanViewState extends State<_QrFastScanView>
     if (!mounted) return;
     if (ModalRoute.of(context)?.isCurrent != true) return;
 
-    final barcode = capture.barcodes.isNotEmpty
-        ? capture.barcodes.first
-        : null;
+    final barcode = capture.barcodes.isNotEmpty ? capture.barcodes.first : null;
 
     final code = barcode?.rawValue;
 
     if (code == null || code.trim().isEmpty) return;
 
-    context.read<QrFastScanBloc>().add(
-          QrCodeDetected(code),
-        );
+    context.read<QrFastScanBloc>().add(QrCodeDetected(code));
   }
 
   void showResultSheet(QrFastScanState state) {
@@ -109,10 +147,7 @@ class _QrFastScanViewState extends State<_QrFastScanView>
                 ),
                 const SizedBox(height: 8),
                 if (state.code != null)
-                  Text(
-                    state.code!,
-                    textAlign: TextAlign.center,
-                  ),
+                  Text(state.code!, textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 if (state.voucherValue != null)
                   Text(
@@ -133,8 +168,8 @@ class _QrFastScanViewState extends State<_QrFastScanView>
                       if (!mounted) return;
 
                       context.read<QrFastScanBloc>().add(
-                            const QrFastScanReset(),
-                          );
+                        const QrFastScanReset(),
+                      );
                     },
                     child: const Text('Scan Again'),
                   ),
@@ -229,10 +264,7 @@ class _QrFastScanViewState extends State<_QrFastScanView>
                     width: scanSize,
                     height: scanSize,
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 3,
-                      ),
+                      border: Border.all(color: Colors.white, width: 3),
                       borderRadius: BorderRadius.circular(24),
                     ),
                   ),
