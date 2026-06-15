@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/ui/campus_card.dart';
+import '../../../shared/ui/campus_scaffold.dart';
 import 'bloc/auth_bloc.dart';
 import 'bloc/auth_event.dart';
 import 'bloc/auth_state.dart';
@@ -53,17 +55,15 @@ class _LoginPageState extends State<LoginPage> {
           );
         }
       },
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF7F8FA),
+      child: CampusScaffold(
+        showPattern: true,
+        // backgroundColor: const Color(0xFFF7F8FA),
         body: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-                side: BorderSide(color: Colors.grey.shade300),
-              ),
+            child: CampusCard(
+              color: Colors.white,
+              padding: const EdgeInsets.all(24),
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
