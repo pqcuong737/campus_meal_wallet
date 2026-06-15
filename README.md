@@ -14,7 +14,7 @@ A Flutter demo application that simulates a **campus meal wallet** experience, b
 
 | Home | Offline/Online Sync | QR Fast Scanner |
 |---|---|---|
-| ![Home](https://res.cloudinary.com/duqetlpif/image/upload/v1780308197/home_mtbkhg.jpg) | ![Offline/Online Sync](https://res.cloudinary.com/duqetlpif/image/upload/v1780308197/offline_sync_tsjdv2.jpg) | ![QR Fast Scanner](https://res.cloudinary.com/duqetlpif/image/upload/v1780308197/qr_fast_scan_y7rler.jpg) |
+| ![Home](https://res.cloudinary.com/duqetlpif/image/upload/v1781517500/home1_n797cq.jpg) | ![Offline/Online Sync](https://res.cloudinary.com/duqetlpif/image/upload/v1781517500/offline_online_sync1_epsivw.jpg) | ![QR Fast Scanner](https://res.cloudinary.com/duqetlpif/image/upload/v1781517500/qr_fast_scan1_gjdqcr.jpg) |
 
 ## Tech stack
 - Flutter / Dart
